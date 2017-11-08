@@ -71,6 +71,7 @@ target/
 
 # exclude data from source control by default
 *.csv
+!elo_dictionary.csv
 
 # excluede legacy
 /src/legacy/
