@@ -1,0 +1,61 @@
+--------------
+24-03-2017
+Primo Log
+--------------
+Stato:
+Yield positivo su test set 2013-2014
+
+Prossimi Step:
+1) Scarica e importa file 2014-2015 e 2015-2016
+2) Processa nuove sessioni
+3) Test yield su nuove stagioni
+4) Check della funzione calcolo yield
+5) Riorganizzazione e condivisione con Lorenz
+
+--------------
+27-03-2017
+Nuove stagioni
+--------------
+Stato:
+Yield negativo su stagioni 2014-2015 e 2015-2016
+Migliorare classificazione, usa tensorflow
+
+Prossimi Step:
+1) Check della funzione calcolo yield
+2) Riorganizzazione e condivisione con Lorenz
+3) Tensorflow!
+
+--------------
+27-03-2017
+Tensorflow is a crack!
+--------------
+Stato:
+Creato i modelli MO02 e MO02_v2 con il tutorial
+https://codelabs.developers.google.com/codelabs/cloud-tensorflow-mnist
+
+Prossimi Step:
+1) Creare evaluation per il modello in tensorflow
+2) Modificare funzione di loss includendo le quote
+
+--------------
+02-04-2017
+Cost function creata
+--------------
+Iniziato MO02_v3. La cost function (da massimizzare) sarà la vincita della scommessa.
+
+Prossimi step:
+1) Terminare la definizione della funzione di costo
+2) Creare le funzioni per estrarre R e Q
+3) Capire come salvare i modelli
+
+--------------
+14-04-2017
+Creata nuova struttura di progetto
+--------------
+Creata la struttura cookiecutter.
+Fatto build feature
+Iniziato train model
+Manca make_data
+Trasferita la funzione costo in train model
+
+1) risolvere problema del gradiente
