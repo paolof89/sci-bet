@@ -1,7 +1,27 @@
 bma
 ==============================
 
-Book Maker Analysis
+To create the database launch the following commands:
+
+> python -m src.data.database_creation
+
+> python -m src.data.add_matches
+
+> python -m src.data.make_dataset
+
+
+To create create features:
+
+> python -m src.features.build_features
+
+To create dummy model:
+
+> python -m src.models.dummy_model
+
+To evaluate bets:
+
+> python -m src.models.evaluate
+
 
 Project Organization
 ------------
