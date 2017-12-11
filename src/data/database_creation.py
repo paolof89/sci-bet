@@ -160,6 +160,8 @@ sql = ("CREATE TABLE add_files "
 
 sql_execute = cursor.execute(sql)
 
+# Create table of elo records
+
 sql = ("""create table elo_scores (
        `team_id` BIGINT(20) NOT NULL,
        `Club` VARCHAR(30) NULL,
@@ -170,6 +172,33 @@ sql = ("""create table elo_scores (
        COLLATE='latin1_swedish_ci'
        ENGINE=InnoDB""")
 sql_execute = cursor.execute(sql)
+
+
+# Create table for probability outcome
+sql = ("""create table match_prob (
+       `MODEL` VARCHAR(20) NOT NULL,
+       `MATCH_ID` BIGINT(20) UNSIGNED,
+       `pH` DOUBLE NULL,
+       `pD` DOUBLE NULL,
+       `pA` DOUBLE NULL,
+       CONSTRAINT PK_elo primary key (`MODEL`, `MATCH_ID`))
+       COLLATE='latin1_swedish_ci'
+       ENGINE=InnoDB""")
+sql_execute = cursor.execute(sql)
+
+# Create table for bet outcome
+sql = ("""create table match_bet (
+       `MODEL` VARCHAR(20) NOT NULL,
+       `STRATEGY` VARCHAR(20) NOT NULL,
+       `MATCH_ID` BIGINT(20) UNSIGNED,
+       `bH` DOUBLE NULL,
+       `bD` DOUBLE NULL,
+       `bA` DOUBLE NULL,
+       CONSTRAINT PK_elo primary key (`MODEL`, `STRATEGY`, `MATCH_ID`))
+       COLLATE='latin1_swedish_ci'
+       ENGINE=InnoDB""")
+sql_execute = cursor.execute(sql)
+
 
 
 # Commit the query

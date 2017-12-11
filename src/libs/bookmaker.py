@@ -14,7 +14,7 @@ class BookMaker():
         return np.asarray(R).astype('int').T  # .reshape(3, 1)
 
     def _bet(self, df):
-        b = df[[u'BH', u'BD', u'BA']]
+        b = df[[u'bH', u'bD', u'bA']]
         return np.asarray(b)  # .reshape(1, 3)
 
     def _payout(self, Q, R, B):

@@ -6,26 +6,27 @@ import pandas as pd
 import pymysql
 from sqlalchemy import create_engine
 pymysql.install_as_MySQLdb() #Install MySQL driver
-from src.features.dummy_featutes import elo_features
+from src.features.features_functions import average_last_5_matches
 
 
 @click.command()
-@click.option('--output-filepath', type=click.Path(), default='data/processed/dummy_features.csv')
-def main(output_filepath):
+def main():
     """
     """
     logger = logging.getLogger(__name__)
     logger.info('Build features')
 
-    # db = my.connect(host='localhost', user='root', passwd='', db='football_data')
     db = create_engine("mysql://root@localhost/football_data")
 
-    elo_features(db)
-
     matches = pd.read_sql("select * from match_teams", db)
+    matches = average_last_5_matches(matches)
 
-    matches.to_csv(output_filepath, index=False)
-    # logger.info("Loaded matches: ", matches.shape[0])
+    matches[['MATCH_ID', 'h_avg_scored', 'h_avg_conceded', 'h_avg_elo',
+       'Team_y', 'a_avg_scored', 'a_avg_conceded', 'a_avg_elo']]\
+        .to_sql(name='features_basic', con=db, if_exists='replace', index=False)
+
+    db.execute("""alter table features_basic
+    ADD PRIMARY KEY(MATCH_ID)""")
 
 
 if __name__ == '__main__':

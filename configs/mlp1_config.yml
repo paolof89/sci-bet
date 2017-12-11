@@ -1,0 +1,23 @@
+features:
+    - h_avg_scored
+    - h_avg_conceded
+    - h_avg_elo
+    - a_avg_scored
+    - a_avg_conceded
+    - a_avg_elo
+    - BbAvH
+    - BbAvD
+    - BbAvA
+
+output:
+    - FTR
+train_seasons:
+    - '0910'
+    - '1011'
+    - '1112'
+    - '1213'
+    - '1314'
+    - '1415'
+test_seasons:
+    - '1516'
+    - '1617'
