@@ -1,4 +1,4 @@
-bma
+Scientific Bet
 ==============================
 
 To create the database launch the following commands:
