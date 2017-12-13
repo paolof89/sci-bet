@@ -3,7 +3,7 @@ import pandas as pd
 def average_last_5_matches(matches):
     #matches = pd.read_sql(con=con, sql="Select * from match_teams")
     team_history = matches.melt(id_vars=['MATCH_ID', 'Date', 'competition_code', 'season_code'], value_vars=['HomeTeam', 'AwayTeam'],
-                                var_name='home_or_away', value_name='Team')
+                            var_name='home_or_away', value_name='Team')
 
     team_history = pivot_stats(df=team_history, matches=matches, home_stat='FTHG', away_stat='FTAG', stat_name='scored')
     team_history = pivot_stats(df=team_history, matches=matches, home_stat='FTAG', away_stat='FTHG', stat_name='conceded')
@@ -11,17 +11,24 @@ def average_last_5_matches(matches):
 
     team_history.sort_values(by=['Team','Date'], inplace=True)
     team_history.set_index(['MATCH_ID','home_or_away'], inplace=True)
+    team_history.drop(axis=1, labels=['Date', 'competition_code'], inplace=True)
+
+    team_history_shift = team_history.groupby(['season_code', 'Team'], as_index=True).transform('shift')
+
+    team_history = team_history[['season_code', 'Team']].join(team_history_shift)
+
     team_history = team_history.groupby(['season_code', 'Team'], as_index=False).rolling(window=5).mean()
+    team_history = team_history.reset_index()
 
     matches = pd.merge(matches, team_history, how='left',
-                       left_on=['Date', 'competition_code', 'season_code', 'HomeTeam'],
-                       right_on=['Date', 'competition_code', 'season_code', 'Team'])
+                       left_on=['MATCH_ID', 'HomeTeam'],
+                       right_on=['MATCH_ID', 'Team'])
     matches.rename(columns={'scored': 'h_avg_scored', 'conceded': 'h_avg_conceded', 'elo': 'h_avg_elo'},
                    inplace=True)
 
     matches = pd.merge(matches, team_history, how='left',
-                       left_on=['Date', 'competition_code', 'season_code', 'AwayTeam'],
-                       right_on=['Date', 'competition_code', 'season_code', 'Team'])
+                       left_on=['MATCH_ID', 'AwayTeam'],
+                       right_on=['MATCH_ID', 'Team'])
     matches.rename(columns={'scored': 'a_avg_scored', 'conceded': 'a_avg_conceded', 'elo': 'a_avg_elo'},
                    inplace=True)
 

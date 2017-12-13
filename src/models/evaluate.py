@@ -11,7 +11,7 @@ pymysql.install_as_MySQLdb()
 @click.command()
 @click.option('--model', default='mlp_1')
 @click.option('--strategy', default='value_bet_0.5')
-def main(model, strategy):
+def main(model='mlp_1', strategy='value_bet_0.5'):
     """
 
     :param bet_file:
@@ -37,6 +37,12 @@ def main(model, strategy):
     print('Total payout: {}'.format(sum(matches.payout)))
     print('Total bet: {}'.format(sum(matches.bet_value)))
     print('Total match: {}'.format(matches.shape[0]))
+
+    matches[['MATCH_ID', 'payout']].to_sql(name='temp_payout', con=db, if_exists='replace')
+    db.execute("""UPDATE match_bet t1, temp_payout t2
+    SET t1.payout = t2.payout
+    WHERE t1.MATCH_ID = t2.MATCH_ID and MODEL = '{model}' and STRATEGY = '{strategy}'""".format(model=model, strategy=strategy))
+    db.execute("""drop table temp_payout""")
 
 
 if __name__ == '__main__':

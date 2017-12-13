@@ -34,7 +34,7 @@ def create_elo_scores(db):
 
             try:
                 last = pd.read_sql("""SELECT updated_untill FROM elo_master
-                WHERE elo_name = '{}'""".format(team.elo_name), db).updated_untill.values[0]
+                 WHERE elo_name = '{}' """.format(team.elo_name), db).updated_untill.values[0]
                 if last is None:
                     last = '2009-01-01'
             except:

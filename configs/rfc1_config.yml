@@ -17,8 +17,8 @@ train_seasons:
     - '1112'
     - '1213'
     - '1314'
+valid_seasons:
     - '1415'
 test_seasons:
     - '1516'
     - '1617'
-    - '1718'

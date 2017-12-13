@@ -20,7 +20,7 @@ def main():
 
     create_matches_table(db)
 
-    create_elo_dict(db)
+    # create_elo_dict(db)
 
     create_elo_scores(db)
 

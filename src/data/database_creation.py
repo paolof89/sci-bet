@@ -194,6 +194,7 @@ sql = ("""create table match_bet (
        `bH` DOUBLE NULL,
        `bD` DOUBLE NULL,
        `bA` DOUBLE NULL,
+       `payout` DOUBLE NULL,
        CONSTRAINT PK_elo primary key (`MODEL`, `STRATEGY`, `MATCH_ID`))
        COLLATE='latin1_swedish_ci'
        ENGINE=InnoDB""")

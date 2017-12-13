@@ -44,10 +44,10 @@ def prob_to_bet(model):
     matches['MODEL'] = model
     matches['STRATEGY'] = strategy
 
-    matches['MODEL'] = 'mlp_1'
     matches.to_sql(name='temp_bet', con=db, if_exists='replace')
+    db.execute("""Delete from match_bet where MODEL='{}' and strategy='{}' """.format(model, strategy))
     db.execute("""insert into match_bet
-        select `MODEL`, `STRATEGY`, `MATCH_ID`, `bH`, `bD`, `bA`
+        select `MODEL`, `STRATEGY`, `MATCH_ID`, `bH`, `bD`, `bA`, 0
         from temp_bet""")
     db.execute("""drop table temp_bet""")
 

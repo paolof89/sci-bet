@@ -1,49 +1,32 @@
 #Football Analytics
+from sqlalchemy import create_engine
+import click
+import pandas as pd
 
-#Add matches to the database that will be scraped
+@click.command()
+def add_matches():
+    #Connect to the MySQL database
+    db = create_engine("mysql://root@localhost/football_data")
 
-#Author: Liam Culligan
-#Date: January 2017
+    #Initialise an empty list
+    files = []
+    #seasons = ['0910', '1011', '1112', '1213', '1314', '1415', '1516', '1617']
+    seasons = ['1718']
+    competitions = ["E0", "SP1", "D1", "D2", "F1", "F2", "N1", "B1", "E1", "E2", "SC0", "SC1", "I1", "I2", "T1", "P1"]
 
-#Import required packages and functions
-import pymysql
-pymysql.install_as_MySQLdb() ##Install MySQL driver
-import MySQLdb as my
+    for s in seasons:
+        for c in competitions:
+            files.append([s, c])
+    df = pd.DataFrame(data=files, columns=['season', 'competion'])
+    #Insert the matches that will be scraped into the add_matches table
+    df.to_sql(name='temp_add_files', con=db, if_exists='replace')
+    db.execute("""insert into add_files (competition_code, season_code, added, failed)
+        select competion, season, 0, 0
+        from temp_add_files""")
+    db.execute("""drop table temp_add_files""")
 
-#Connect to the MySQL database
-db = my.connect(host = 'localhost', user = 'root', passwd = '', db = 'football_data')
 
-cursor = db.cursor()
+if __name__ == '__main__':
+    log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
-#Finding the matches to add is a manual process
-#Need to locate the relevant range of match ids
- 
-#Initialise an empty list
-files = []
-
-seasons = ['0910', '1011', '1112', '1213', '1314', '1415', '1516', '1617']
-competitions = ["E0", "SP1", "D1", "D2", "F1", "F2", "N1", "B1", "E1", "E2", "SC0", "SC1", "I1", "I2", "T1", "P1"]
-#For example...
-
-#English Premier League - competition_id 1
-#2012/2013 - season_id 4
-
-#Loop through all seasons and competitions ids for the selected league-season
-
-for s in seasons:
-    for c in competitions:
-        files.append([s, c])
-    
-#Insert the matches that will be scraped into the add_matches table 
-sql = ("INSERT IGNORE INTO add_files "
-      "(season_code, competition_code) "
-      "VALUES (%s, %s)")
-                
-sql_execute = cursor.executemany(sql, files)
-
-#Commit the query
-db.commit()
-
-#Close the connection
-db.close()
-
+    add_matches()
