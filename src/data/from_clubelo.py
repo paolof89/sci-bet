@@ -60,6 +60,44 @@ def create_elo_scores(db):
             logger.error('on ', team.elo_name)
 
 
+def update_elo_scores(db):
+    logger = logging.getLogger(__name__)
+
+    teams = pd.read_sql("""select team_id, elo_name from teams
+    where team_id in (select HomeTeam FROM MATCH_TEAMS WHERE FTR IS NULL)
+    or team_id in (select AwayTeam FROM MATCH_TEAMS WHERE FTR IS NULL)""", db)
+
+    dates = pd.read_sql("""select Date FROM MATCH_TEAMS WHERE FTR IS NULL""", db)
+
+    for date in dates.Date.unique():
+        try:
+            url = "http://api.clubelo.com/"+str(date)
+            logger.info(url.strip())
+            s = requests.get(url).content
+            eloRank = pd.read_csv(io.StringIO(s.decode('utf-8')))
+            eloRank.From = pd.to_datetime(eloRank.From).dt.strftime('%Y-%m-%d')
+            eloRank.To = pd.to_datetime(eloRank.To).dt.strftime('%Y-%m-%d')
+
+            eloRank = pd.merge(eloRank, teams, how='inner', right_on='elo_name', left_on='Club')
+
+
+            eloRank[['team_id', 'Club', 'Elo', 'From', 'To']].to_sql(name='temp_elo', con=db, if_exists='replace', index=False)
+
+            delete_past = ("""delete a.* from  elo_scores a, temp_elo b
+            where a.team_id = b.team_id and a.`From` = b.`From` """)
+            db.execute(delete_past)
+
+            insert_elo_sql = ("""INSERT INTO elo_scores
+                             SELECT * from temp_elo""")
+            db.execute(insert_elo_sql)
+
+        except Exception as e:
+            logger.error('Failed: ' + str(e))
+            logger.error('on ', date)
+
+
 def update_elo_on_match_teams(db):
     logger = logging.getLogger(__name__)
     sql = """UPDATE """
+
+

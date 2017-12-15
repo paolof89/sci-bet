@@ -1,7 +1,7 @@
 import logging
 import pandas as pd
 import pymysql
-
+import numpy as np
 pymysql.install_as_MySQLdb() #Install MySQL driver
 
 
@@ -34,10 +34,7 @@ def create_matches_table(db):
                                                                                                   season=s))
             continue
 
-        teams_names = list(set(data.HomeTeam.unique()) & set(data.AwayTeam.unique()))
-        teams_names = [x.replace('\'', ' ') for x in teams_names]
-        data['HomeTeam'] = [x.replace('\'', ' ') for x in data['HomeTeam']]
-        data['AwayTeam'] = [x.replace('\'', ' ') for x in data['AwayTeam']]
+        data, teams_names = clean_team_names(data)
 
         update_team_sql = ("UPDATE teams "
            "SET long_name='{team}' "
@@ -52,42 +49,76 @@ def create_matches_table(db):
             if exist.empty:
                 sql_execute = db.execute(insert_team_sql.format(team=t))
 
+        data = add_teams_id(data, db)
 
-        teams_sql = ("SELECT m.team_id, m.long_name FROM teams m")
-        teams = pd.read_sql(teams_sql, con=db)
-
-        data = pd.merge(data, teams, how='left', left_on='HomeTeam', right_on='long_name')
-        data = data.rename(columns={'team_id': 'HomeTeam_id'})
-        data = pd.merge(data, teams, how='left', left_on='AwayTeam', right_on='long_name')
-        data = data.rename(columns={'team_id': 'AwayTeam_id'})
         data['season_code'] = s
         data['competition_code'] = c
 
-        import numpy as np
-        if 'HS' not in data.columns:
-            data['HS'] = np.nan
-            data['AS'] = np.nan
-            data['HST'] = np.nan
-            data['AST'] = np.nan
+        data = fill_shots_columns(data)
 
-        try:
+        matches_to_db(data, db, c, s, logger)
 
-            data[['Date', 'competition_code', 'season_code', 'HomeTeam_id', 'AwayTeam_id', 'FTHG', 'FTAG', 'FTR',
-            'HTHG', 'HTAG', 'HTR', 'HS', 'AS', 'HST', 'AST', 'B365H', 'B365D', 'B365A', 'BWH', 'BWD',	'BWA', 'WHH',
-            'WHD', 'WHA', 'BbMxH', 'BbAvH',	'BbMxD', 'BbAvD', 'BbMxA', 'BbAvA', 'BbMx>2.5', 'BbAv>2.5', 'BbMx<2.5',
-            'BbAv<2.5']].to_sql(name='temp_match_teams', con=db, if_exists='replace', index=False)
 
-            insert_team_sql = ("""INSERT INTO match_teams (Date, competition_code, season_code, HomeTeam, AwayTeam,
-             FTHG, FTAG, FTR, HTHG, HTAG, HTR, HS, `AS`, HST, AST, B365H, B365D, B365A, BWH, BWD, BWA, WHH,
-            WHD, WHA, BbMxH, BbAvH,	BbMxD, BbAvD, BbMxA, BbAvA, `BbMx>2.5`, `BbAv>2.5`, `BbMx<2.5`, `BbAv<2.5`)
-             SELECT Date, competition_code, season_code, HomeTeam_id, AwayTeam_id,
-              FTHG, FTAG, FTR, HTHG, HTAG, HTR, HS, `AS`, HST, AST, B365H, B365D, B365A, BWH, BWD, BWA, WHH,
-            WHD, WHA, BbMxH, BbAvH,	BbMxD, BbAvD, BbMxA, BbAvA, `BbMx>2.5`, `BbAv>2.5`, `BbMx<2.5`, `BbAv<2.5` from temp_match_teams""")
+def clean_team_names(data):
+    teams_names = list(set(data.HomeTeam.unique()) & set(data.AwayTeam.unique()))
+    teams_names = [x.replace('\'', ' ') for x in teams_names]
+    data['HomeTeam'] = [x.replace('\'', ' ') for x in data['HomeTeam']]
+    data['AwayTeam'] = [x.replace('\'', ' ') for x in data['AwayTeam']]
+    return data, teams_names
 
-            db.execute(insert_team_sql)
-            db.execute("UPDATE add_files SET added=1 "
-                       "WHERE competition_code='{competition}' and season_code='{season}'".format(competition=c, season=s))
-        except Exception as e:
-            logger.error('Failed: ' + str(e))
-            db.execute("UPDATE add_files SET failed=1 "
-                       "WHERE competition_code='{competition}' and season_code='{season}'".format(competition=c, season=s))
+def add_teams_id(data, db):
+    teams_sql = ("SELECT m.team_id, m.long_name FROM teams m")
+    teams = pd.read_sql(teams_sql, con=db)
+
+    data = pd.merge(data, teams, how='left', left_on='HomeTeam', right_on='long_name')
+    data = data.rename(columns={'team_id': 'HomeTeam_id'})
+    data = pd.merge(data, teams, how='left', left_on='AwayTeam', right_on='long_name')
+    data = data.rename(columns={'team_id': 'AwayTeam_id'})
+    return data
+
+
+def fill_shots_columns(data):
+    if 'HS' not in data.columns:
+        data['HS'] = np.nan
+        data['AS'] = np.nan
+        data['HST'] = np.nan
+        data['AST'] = np.nan
+    return data
+
+def matches_to_db(data, db, c, s, logger):
+    try:
+        data[['Date', 'competition_code', 'season_code', 'HomeTeam_id', 'AwayTeam_id', 'FTHG', 'FTAG', 'FTR',
+              'HTHG', 'HTAG', 'HTR', 'HS', 'AS', 'HST', 'AST', 'B365H', 'B365D', 'B365A', 'BWH', 'BWD', 'BWA', 'WHH',
+              'WHD', 'WHA', 'BbMxH', 'BbAvH', 'BbMxD', 'BbAvD', 'BbMxA', 'BbAvA', 'BbMx>2.5', 'BbAv>2.5', 'BbMx<2.5',
+              'BbAv<2.5']].to_sql(name='temp_match_teams', con=db, if_exists='replace', index=False)
+
+        insert_team_sql = ("""INSERT INTO match_teams (Date, competition_code, season_code, HomeTeam, AwayTeam,
+         FTHG, FTAG, FTR, HTHG, HTAG, HTR, HS, `AS`, HST, AST, B365H, B365D, B365A, BWH, BWD, BWA, WHH,
+        WHD, WHA, BbMxH, BbAvH,	BbMxD, BbAvD, BbMxA, BbAvA, `BbMx>2.5`, `BbAv>2.5`, `BbMx<2.5`, `BbAv<2.5`)
+         SELECT Date, competition_code, season_code, HomeTeam_id, AwayTeam_id,
+          FTHG, FTAG, FTR, HTHG, HTAG, HTR, HS, `AS`, HST, AST, B365H, B365D, B365A, BWH, BWD, BWA, WHH,
+        WHD, WHA, BbMxH, BbAvH,	BbMxD, BbAvD, BbMxA, BbAvA, `BbMx>2.5`, `BbAv>2.5`, `BbMx<2.5`, `BbAv<2.5` from temp_match_teams""")
+
+        db.execute(insert_team_sql)
+        db.execute("UPDATE add_files SET added=1 "
+                   "WHERE competition_code='{competition}' and season_code='{season}'".format(competition=c, season=s))
+    except Exception as e:
+        logger.error('Failed: ' + str(e))
+        db.execute("UPDATE add_files SET failed=1 "
+                   "WHERE competition_code='{competition}' and season_code='{season}'".format(competition=c, season=s))
+
+
+def add_latest_matches(db, season):
+    logger = logging.getLogger(__name__)
+    data = pd.read_csv('http://www.football-data.co.uk/fixtures.csv')
+    data['Date'] = pd.to_datetime(data['Date'], format='%d/%m/%y').apply(lambda x: x.strftime('%Y-%m-%d'))
+
+    data, teams_names = clean_team_names(data)
+    data = add_teams_id(data, db)
+
+    data['season_code'] = season
+    data['competition_code'] = data['Div']
+
+    data = fill_shots_columns(data)
+
+    matches_to_db(data, db, c='latest', s=season, logger=logger)

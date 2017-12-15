@@ -5,7 +5,7 @@ import logging
 import pandas as pd
 import pymysql
 from sqlalchemy import create_engine
-pymysql.install_as_MySQLdb() #Install MySQL driver
+import numpy as np
 from src.features.features_functions import average_last_5_matches
 
 
@@ -21,8 +21,17 @@ def main():
     matches = pd.read_sql("select * from match_teams", db)
     matches = average_last_5_matches(matches)
 
+    matches['elo_relative'] = matches['h_avg_elo'] / matches['a_avg_elo']
+    matches['elo_diff'] = matches['h_avg_elo'] - matches['a_avg_elo']
+    matches['scored_relative'] = matches['h_avg_scored'] / matches['a_avg_scored']
+    matches['scored_diff'] = matches['h_avg_scored'] - matches['a_avg_scored']
+    matches['conceded_relative'] = matches['h_avg_conceded'] / matches['a_avg_conceded']
+    matches['conceded_diff'] = matches['h_avg_conceded'] - matches['a_avg_conceded']
+
     matches[['MATCH_ID', 'h_avg_scored', 'h_avg_conceded', 'h_avg_elo',
-       'Team_y', 'a_avg_scored', 'a_avg_conceded', 'a_avg_elo']]\
+       'Team_y', 'a_avg_scored', 'a_avg_conceded', 'a_avg_elo',
+             'elo_relative', 'elo_diff', 'scored_relative', 'scored_diff',
+             'conceded_relative', 'conceded_diff']].replace([np.inf, -np.inf], np.nan).dropna()\
         .to_sql(name='features_basic', con=db, if_exists='replace', index=False)
 
     db.execute("""alter table features_basic

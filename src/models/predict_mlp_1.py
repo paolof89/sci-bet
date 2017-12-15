@@ -14,7 +14,8 @@ import datetime as dt
 
 @click.command()
 @click.option('--input-query', type=click.Path(exists=True), default='queries/mlp_1_input.sql')
-def main(input_query):
+@click.option('--save_train_prediction', default=True)
+def main(input_query, save_train_prediction):
     """
     Compute dummy bets based on elo score. If HomeTeamElo > AwayTeamElo then bet=H else bet=A
     :param input_file: input file with necessary features
@@ -34,7 +35,7 @@ def main(input_query):
     df = pd.read_sql(query, con=db)
 
     df = df.set_index('MATCH_ID')
-    df = df.loc[~(df[cfg['features']+cfg['output']].isnull().any(1))]
+    df = df.loc[~(df[cfg['features']].isnull().any(1))]
     train = df.loc[df.season_code.isin(cfg['train_seasons'])]
     test = df.loc[df.season_code.isin(cfg['test_seasons'])]
 
@@ -57,16 +58,24 @@ def main(input_query):
     print('Train loss, acc ', model.evaluate([train_x, train_HomeTeam, train_AwayTeam], train_y.as_matrix(), verbose=0))
     print('Test loss, acc ', model.evaluate([test_x, test_HomeTeam, test_AwayTeam], test_y.as_matrix(), verbose=0))
 
+    db.execute(""" Delete from match_prob where MODEL='{}' """.format('mlp_1'))
     probs = pd.DataFrame(data=model.predict([test_x, test_HomeTeam, test_AwayTeam]),
                         columns=['pA', 'pD', 'pH'], index=test.index)
+    prob_to_db(probs, db)
 
+    if save_train_prediction == True:
+        probs = pd.DataFrame(data=model.predict([train_x, train_HomeTeam, train_AwayTeam]),
+                         columns=['pA', 'pD', 'pH'], index=train.index)
+        prob_to_db(probs, db)
+
+
+def prob_to_db(probs, db):
     probs['MODEL'] = 'mlp_1'
     probs.to_sql(name='temp_prob', con=db, if_exists='replace')
-    db.execute("""Delete from match_prob where MODEL='{}' """.format('mlp_1'))
 
     db.execute("""insert into match_prob
-    select `MODEL`, `MATCH_ID`, `pH`, `pD`, `pA`
-    from temp_prob""")
+        select `MODEL`, `MATCH_ID`, `pH`, `pD`, `pA`
+        from temp_prob """)
 
     db.execute("""drop table temp_prob""")
 

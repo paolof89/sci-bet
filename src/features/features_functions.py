@@ -50,7 +50,3 @@ def pivot_stats(df, matches, home_stat, away_stat, stat_name):
     return df
 
 
-
-from sqlalchemy import create_engine
-con = create_engine("mysql://root@localhost/football_data")
-

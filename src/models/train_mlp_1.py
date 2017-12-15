@@ -15,6 +15,8 @@ from keras.layers.merge import concatenate
 from sqlalchemy import create_engine
 import csv
 from src.libs.models_utils import save_model
+from keras.utils import plot_model
+from tensorflow.contrib.keras import backend as kbackend
 
 @click.command()
 @click.option('--input-query', type=click.Path(exists=True), default='queries/mlp_1_input.sql')
@@ -58,24 +60,29 @@ def main(input_query):
     test_x = ss.transform(X=test[cfg['features']])
     test_y = pd.get_dummies(test[cfg['output']])
 
-
     #### MLP MODEL ####
+
+    K.set_learning_phase(1)
+
     mlp_input = Input(shape=(train_x.shape[1], ))
     input_home_team = Input(shape=(1,))
     input_away_team = Input(shape=(1,))
 
-    embedding_home_team = Embedding(team_number, 3)(input_home_team)
+    embedding_home_team = Embedding(team_number, 1)(input_home_team)
     flatten_home_team = Flatten()(embedding_home_team)
 
-    embedding_away_team = Embedding(team_number, 3)(input_away_team)
+    embedding_away_team = Embedding(team_number, 1)(input_away_team)
     flatten_away_team = Flatten()(embedding_away_team)
 
     merge = concatenate([flatten_home_team, flatten_away_team])
     merge = concatenate([mlp_input, merge])
 
     layer1 = Dense(10, activation='relu')(merge)
+    #layer1 = Dropout(0.2)(layer1)
     layer2 = Dense(10, activation='relu')(layer1)
+    #layer2 = Dropout(0.2)(layer2)
     layer3 = Dense(10, activation='relu')(layer2)
+    #layer3 = Dropout(0.2)(layer3)
     dense_output = Dense(train_y.shape[1], activation='softmax')(layer3)
 
     model = Model(inputs=[mlp_input, input_home_team, input_away_team], outputs=[dense_output])
@@ -85,11 +92,12 @@ def main(input_query):
     print(model.summary())
     delete_folder(pathlib.Path('Graph'))
 
-    tb_callback = TensorBoard(log_dir='Graph', histogram_freq=5, write_graph=True, batch_size=10, embeddings_freq=20)
+    tb_callback = TensorBoard(log_dir='Graph', histogram_freq=5, write_graph=True, batch_size=64, embeddings_freq=20)
     teams_ = pd.merge(pd.DataFrame(data=np.arange(team_number), columns=['team_id']),teams, on='team_id', how='left')
     teams_.to_csv('Graph/teams.tsv', sep='\t', index=False, quoting=csv.QUOTE_NONNUMERIC)
 
-    model.fit([train_x, train_HomeTeam, train_AwayTeam], train_y.as_matrix(), validation_split=0.01, epochs=2, verbose=2, callbacks=[tb_callback])
+    model.fit([train_x, train_HomeTeam, train_AwayTeam], train_y.as_matrix(), validation_split=0.05, epochs=5,
+              batch_size=64, verbose=2, callbacks=[tb_callback])
 
     print('Train loss, acc ', model.evaluate([train_x, train_HomeTeam, train_AwayTeam], train_y.as_matrix(), verbose=0))
     print('Test loss, acc ', model.evaluate([test_x, test_HomeTeam, test_AwayTeam], test_y.as_matrix(), verbose=0))

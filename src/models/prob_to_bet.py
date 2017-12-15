@@ -10,9 +10,10 @@ pymysql.install_as_MySQLdb()
 
 @click.command()
 @click.option('--model', default='mlp_1')
-def prob_to_bet(model):
+@click.option('--threshold', default=0.1)
+def prob_to_bet(model, threshold=0.1):
 
-    threshold = 0.5
+    threshold = threshold
     logger = logging.getLogger(__name__)
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -37,9 +38,9 @@ def prob_to_bet(model):
     matches['bH'] = 0
     matches['bD'] = 0
     matches['bA'] = 0
-    matches.loc[matches.fairH < matches.BbAvH - threshold, 'bH'] = 1
-    matches.loc[matches.fairD < matches.BbAvD - threshold, 'bD'] = 1
-    matches.loc[matches.fairA < matches.BbAvA - threshold, 'bA'] = 1
+    matches.loc[matches.BbAvH / matches.fairH > 1+threshold, 'bH'] = 1
+    matches.loc[matches.BbAvD / matches.fairD > 1+threshold, 'bD'] = 1
+    matches.loc[matches.BbAvA / matches.fairA > 1+threshold, 'bA'] = 1
 
     matches['MODEL'] = model
     matches['STRATEGY'] = strategy

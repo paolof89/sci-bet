@@ -8,6 +8,12 @@ features:
     - BbAvH
     - BbAvD
     - BbAvA
+#    - elo_relative
+#    - elo_diff
+#    - scored_relative
+#    - scored_diff
+#    - conceded_relative
+#    - conceded_diff
 
 output:
     - FTR

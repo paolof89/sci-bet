@@ -5,8 +5,8 @@ import logging
 import pymysql
 from sqlalchemy import create_engine
 pymysql.install_as_MySQLdb() #Install MySQL driver
-from src.data.from_footballdata import create_matches_table
-from src.data.from_clubelo import create_elo_scores, create_elo_dict
+from src.data.from_footballdata import create_matches_table, add_latest_matches
+from src.data.from_clubelo import create_elo_scores, create_elo_dict, update_elo_scores
 
 @click.command()
 def main():
@@ -18,11 +18,9 @@ def main():
 
     db = create_engine("mysql://root@localhost/football_data")
 
-    create_matches_table(db)
+    add_latest_matches(db, '1718')
 
-    # create_elo_dict(db)
-
-    create_elo_scores(db)
+    update_elo_scores(db)
 
     update_elo_on_match_table(db)
 
