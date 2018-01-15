@@ -1,7 +1,7 @@
 import pandas as pd
 
 def average_last_5_matches(matches):
-    #matches = pd.read_sql(con=con, sql="Select * from match_teams")
+    #matches = pd.read_sql(con=con, sql="Select * from matches")
     team_history = matches.melt(id_vars=['MATCH_ID', 'Date', 'competition_code', 'season_code'], value_vars=['HomeTeam', 'AwayTeam'],
                             var_name='home_or_away', value_name='Team')
 

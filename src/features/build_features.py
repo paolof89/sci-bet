@@ -18,7 +18,7 @@ def main():
 
     db = create_engine("mysql://root@localhost/football_data")
 
-    matches = pd.read_sql("select * from match_teams", db)
+    matches = pd.read_sql("select * from matches", db)
     matches = average_last_5_matches(matches)
 
     matches['elo_relative'] = matches['h_avg_elo'] / matches['a_avg_elo']

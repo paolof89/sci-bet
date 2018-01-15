@@ -22,7 +22,7 @@ def prob_to_bet(model, threshold=0.1):
     db = create_engine("mysql://root@localhost/football_data")
     prob = pd.read_sql("""select * from match_prob where model='{}'""".format(model), con=db)
 
-    quotes = pd.read_sql(sql="select MATCH_ID, BbAvH, BbAvD, BbAvA from match_teams", con=db)
+    quotes = pd.read_sql(sql="select MATCH_ID, BbAvH, BbAvD, BbAvA from matches", con=db)
 
     matches = pd.merge(quotes, prob, on='MATCH_ID')
 

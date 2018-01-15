@@ -26,7 +26,7 @@ def main(model='mlp_1', strategy='value_bet_0.5'):
     bet = pd.read_sql(sql="select MATCH_ID, bH, bD, bA from match_bet where MODEL = '{model}' and STRATEGY = '{strategy}'"
                       .format(model=model, strategy=strategy), con=db)
 
-    matches = pd.read_sql(sql="select MATCH_ID, BbAvH, BbAvD, BbAvA, FTR from match_teams", con=db)
+    matches = pd.read_sql(sql="select MATCH_ID, BbAvH, BbAvD, BbAvA, FTR from matches", con=db)
 
     matches = pd.merge(matches, bet, on='MATCH_ID')
 

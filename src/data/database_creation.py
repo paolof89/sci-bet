@@ -1,13 +1,14 @@
-# Football Analytics
+# Football Bets
 
-# Database and tables creation
+# Create the database structure
 
-# Author: Liam Culligan
-# Date: January 2017
+# Author: Paolo Finardi
+# Date: Dec 2017
+
+# Tanks to Liam Culligan
 
 # Import required packages and functions
 import pymysql
-
 pymysql.install_as_MySQLdb()  # Install MySQL driver
 import MySQLdb as my
 
@@ -15,10 +16,9 @@ import MySQLdb as my
 try:
 # Connect to the localhost
     db = my.connect(host='localhost', user='root', passwd='')
-
     cursor = db.cursor()
-# Create the database
 
+# Drop old version of the database
     sql = ("DROP DATABASE football_data ")
     sql_execute = cursor.execute(sql)
     # Commit the query
@@ -28,6 +28,8 @@ try:
 except:
     pass
 
+
+# Create new database
 db = my.connect(host='localhost', user='root', passwd='')
 cursor = db.cursor()
 sql = ("CREATE DATABASE football_data COLLATE 'utf8_general_ci'")
@@ -35,9 +37,11 @@ sql_execute = cursor.execute(sql)
 db.commit()
 db.close()
 
+
 # Connect to the newly-created database
 db = my.connect(host='localhost', user='root', passwd='', db='football_data')
 cursor = db.cursor()
+
 
 # Create teams table
 sql = ("CREATE TABLE teams "
@@ -48,36 +52,35 @@ sql = ("CREATE TABLE teams "
        "colour VARCHAR(255),"
        "elo_name VARCHAR(255),"
        "OPTA_name VARCHAR(255))")
-
 sql_execute = cursor.execute(sql)
+
 
 # Create seasons table
 sql = ("CREATE TABLE seasons "
        "(season_code VARCHAR(4)  PRIMARY KEY, "
        "season_name VARCHAR(7))")
-
 sql_execute = cursor.execute(sql)
+
 
 # Insert season rows
 sql = ("INSERT INTO seasons "
        "(season_code, season_name) "
        "VALUES (%s, %s)")
-
 sql_execute = cursor.executemany(sql, [['0910', "2009/10"], ['1011', "2010/11"], ['1112', "2011/12"]
     , ['1213', "2012/13"], ['1314', "2013/14"], ['1415', "2014/15"], ['1516', "2015/16"], ['1617', "2016/17"]])
+
 
 # Create competitions table
 sql = ("CREATE TABLE competitions "
        "(competition_code VARCHAR(4) PRIMARY KEY, "
        "competition_name VARCHAR(100))")
-
 sql_execute = cursor.execute(sql)
+
 
 # Insert competition rows
 sql = ("INSERT INTO competitions "
        "(competition_name, competition_code) "
        "VALUES (%s, %s)")
-
 competitions = [["English Premier League", "E0"], ["Spanish La Liga", "SP1"], \
                 ["German Bundesliga", "D1"], ["German Bundesliga 2", "D2"], \
                 ["French Ligue 1", "F1"], ["French Ligue 2", "F2"],
@@ -86,24 +89,11 @@ competitions = [["English Premier League", "E0"], ["Spanish La Liga", "SP1"], \
                 ["Scotland Premier League", "SC0"], ["Scotland Division 1", "SC1"], \
                 ["Italian Serie A", "I1"], ["Italian Serie B", "I2"], \
                 ["Turkish Super Lig", "T1"], ["Portugal La Liga", "P1"]]
-
 sql_execute = cursor.executemany(sql, competitions)
 
+
 # Create matches table
-sql = ("CREATE TABLE matches "
-       "(match_id INT(10) UNSIGNED PRIMARY KEY, "
-       "season_code VARCHAR(4), "
-       "competition_code VARCHAR(4), "
-       "date_time DATETIME, "
-       "venue VARCHAR(255), "
-       "KEY date_time (date_time), "
-       "FOREIGN KEY (season_code) REFERENCES seasons(season_code), "
-       "FOREIGN KEY (competition_code) REFERENCES competitions(competition_code))")
-
-sql_execute = cursor.execute(sql)
-
-# Create match_teams table
-sql = ("""CREATE TABLE match_teams (
+sql = ("""CREATE TABLE matches (
 	`MATCH_ID` BIGINT(20) UNSIGNED PRIMARY KEY AUTO_INCREMENT,
 	`Date` DATE NULL DEFAULT NULL,
 	`competition_code` VARCHAR(4) NULL,
@@ -144,12 +134,10 @@ sql = ("""CREATE TABLE match_teams (
     INDEX date_teams USING BTREE (Date, HomeTeam, AwayTeam))
     COLLATE='latin1_swedish_ci'
     ENGINE=InnoDB""")
-
 sql_execute = cursor.execute(sql)
 
-# Create table of matches to add to the database
-# sql = ('DROP TABLE add_files')
 
+# Create table of matches to add to the database
 sql = ("CREATE TABLE add_files "
        "(file_id INT(10) UNSIGNED PRIMARY KEY AUTO_INCREMENT, "
        "competition_code VARCHAR(4), "
@@ -157,11 +145,10 @@ sql = ("CREATE TABLE add_files "
        "added TINYINT(1) UNSIGNED DEFAULT '0', "
        "failed TINYINT(1) UNSIGNED DEFAULT '0', "
        "KEY added (added))")
-
 sql_execute = cursor.execute(sql)
 
-# Create table of elo records
 
+# Create table of elo records
 sql = ("""create table elo_scores (
        `team_id` BIGINT(20) NOT NULL,
        `Club` VARCHAR(30) NULL,
@@ -186,6 +173,7 @@ sql = ("""create table match_prob (
        ENGINE=InnoDB""")
 sql_execute = cursor.execute(sql)
 
+
 # Create table for bet outcome
 sql = ("""create table match_bet (
        `MODEL` VARCHAR(20) NOT NULL,
@@ -199,7 +187,6 @@ sql = ("""create table match_bet (
        COLLATE='latin1_swedish_ci'
        ENGINE=InnoDB""")
 sql_execute = cursor.execute(sql)
-
 
 
 # Commit the query

@@ -14,13 +14,21 @@ To create create features:
 
 > python -m src.features.build_features
 
-To create dummy model:
+To create dummy model of match probability outcomes:
 
-> python -m src.models.dummy_model
+> python -m src.models.train_mlp_1
+
+To predict match probability outcomes:
+
+> python -m src.models.predict_mlp_1
+
+To transform probability to value bets:
+
+> python -m src.models.prob_to_bet --threshold=0.2
 
 To evaluate bets:
 
-> python -m src.models.evaluate
+> python -m src.models.evaluate --strategy=value_bet_0.2
 
 
 Project Organization

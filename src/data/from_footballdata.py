@@ -90,14 +90,14 @@ def matches_to_db(data, db, c, s, logger):
         data[['Date', 'competition_code', 'season_code', 'HomeTeam_id', 'AwayTeam_id', 'FTHG', 'FTAG', 'FTR',
               'HTHG', 'HTAG', 'HTR', 'HS', 'AS', 'HST', 'AST', 'B365H', 'B365D', 'B365A', 'BWH', 'BWD', 'BWA', 'WHH',
               'WHD', 'WHA', 'BbMxH', 'BbAvH', 'BbMxD', 'BbAvD', 'BbMxA', 'BbAvA', 'BbMx>2.5', 'BbAv>2.5', 'BbMx<2.5',
-              'BbAv<2.5']].to_sql(name='temp_match_teams', con=db, if_exists='replace', index=False)
+              'BbAv<2.5']].to_sql(name='temp_matches', con=db, if_exists='replace', index=False)
 
-        insert_team_sql = ("""INSERT INTO match_teams (Date, competition_code, season_code, HomeTeam, AwayTeam,
+        insert_team_sql = ("""INSERT INTO matches (Date, competition_code, season_code, HomeTeam, AwayTeam,
          FTHG, FTAG, FTR, HTHG, HTAG, HTR, HS, `AS`, HST, AST, B365H, B365D, B365A, BWH, BWD, BWA, WHH,
         WHD, WHA, BbMxH, BbAvH,	BbMxD, BbAvD, BbMxA, BbAvA, `BbMx>2.5`, `BbAv>2.5`, `BbMx<2.5`, `BbAv<2.5`)
          SELECT Date, competition_code, season_code, HomeTeam_id, AwayTeam_id,
           FTHG, FTAG, FTR, HTHG, HTAG, HTR, HS, `AS`, HST, AST, B365H, B365D, B365A, BWH, BWD, BWA, WHH,
-        WHD, WHA, BbMxH, BbAvH,	BbMxD, BbAvD, BbMxA, BbAvA, `BbMx>2.5`, `BbAv>2.5`, `BbMx<2.5`, `BbAv<2.5` from temp_match_teams""")
+        WHD, WHA, BbMxH, BbAvH,	BbMxD, BbAvD, BbMxA, BbAvA, `BbMx>2.5`, `BbAv>2.5`, `BbMx<2.5`, `BbAv<2.5` from temp_matches""")
 
         db.execute(insert_team_sql)
         db.execute("UPDATE add_files SET added=1 "

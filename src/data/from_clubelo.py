@@ -64,10 +64,10 @@ def update_elo_scores(db):
     logger = logging.getLogger(__name__)
 
     teams = pd.read_sql("""select team_id, elo_name from teams
-    where team_id in (select HomeTeam FROM MATCH_TEAMS WHERE FTR IS NULL)
-    or team_id in (select AwayTeam FROM MATCH_TEAMS WHERE FTR IS NULL)""", db)
+    where team_id in (select HomeTeam FROM matches WHERE FTR IS NULL)
+    or team_id in (select AwayTeam FROM matches WHERE FTR IS NULL)""", db)
 
-    dates = pd.read_sql("""select Date FROM MATCH_TEAMS WHERE FTR IS NULL""", db)
+    dates = pd.read_sql("""select Date FROM matches WHERE FTR IS NULL""", db)
 
     for date in dates.Date.unique():
         try:
@@ -96,7 +96,7 @@ def update_elo_scores(db):
             logger.error('on ', date)
 
 
-def update_elo_on_match_teams(db):
+def update_elo_on_matches(db):
     logger = logging.getLogger(__name__)
     sql = """UPDATE """
 
