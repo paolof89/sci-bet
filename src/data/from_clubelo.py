@@ -56,8 +56,9 @@ def create_elo_scores(db):
             db.execute(update_elo_master)
 
         except Exception as e:
-            logger.error('Failed: ' + str(e))
-            logger.error('on ', team.elo_name)
+            pass
+            # logger.error('Failed: ' + str(e))
+            # logger.error('on ', team.elo_name)
 
 
 def update_elo_scores(db):

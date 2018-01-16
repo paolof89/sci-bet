@@ -10,8 +10,8 @@ def add_matches():
 
     #Initialise an empty list
     files = []
-    #seasons = ['0910', '1011', '1112', '1213', '1314', '1415', '1516', '1617']
-    seasons = ['1718']
+    seasons = ['0910', '1011', '1112', '1213', '1314', '1415', '1516', '1617', '1718']
+
     competitions = ["E0", "SP1", "D1", "D2", "F1", "F2", "N1", "B1", "E1", "E2", "SC0", "SC1", "I1", "I2", "T1", "P1"]
 
     for s in seasons:
