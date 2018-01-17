@@ -9,6 +9,9 @@ To create the database launch the following commands:
 
 > python -m src.data.make_dataset
 
+To update the database:
+
+> python -m src.data.update_dataset.py
 
 To create create features:
 

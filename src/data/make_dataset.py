@@ -18,9 +18,9 @@ def main():
 
     db = create_engine("mysql://root@localhost/football_data")
 
-    create_matches_table(db)
+    #create_matches_table(db)
 
-    create_elo_dict(db)
+    #create_elo_dict(db)
 
     create_elo_scores(db)
 
