@@ -16,7 +16,7 @@ def main():
     logger = logging.getLogger(__name__)
     logger.info('Build features')
 
-    db = create_engine("mysql://root@localhost/football_data")
+    db = create_engine("mysql://root:password@localhost/football_data")
 
     matches = pd.read_sql("select * from matches", db)
     matches = average_last_5_matches(matches)

@@ -15,7 +15,8 @@ def create_matches_table(db):
 
         try:
             print('http://www.football-data.co.uk/mmz4281/'+s+'/'+c+'.csv')
-            data = pd.read_csv('http://www.football-data.co.uk/mmz4281/'+s+'/'+c+'.csv')
+            # data = pd.read_csv('http://www.football-data.co.uk/mmz4281/'+s+'/'+c+'.csv')
+            data = pd.read_csv('data/raw/B1.csv')
         except Exception as e:
             # TODO manage error file not exist
             print('No data for this league: {competition} / {season}'.format(competition=c, season=s))

@@ -16,7 +16,7 @@ def main():
     logger = logging.getLogger(__name__)
     logger.info('making final data set from raw data')
 
-    db = create_engine("mysql://root@localhost/football_data")
+    db = create_engine("mysql://root:password@localhost/football_data")
 
     add_latest_matches(db, '1718')
 

@@ -15,7 +15,7 @@ import MySQLdb as my
 # Drop existing db
 try:
 # Connect to the localhost
-    db = my.connect(host='localhost', user='root', passwd='')
+    db = my.connect(host='localhost', user='root', passwd='password')
     cursor = db.cursor()
 
 # Drop old version of the database
@@ -30,7 +30,7 @@ except:
 
 
 # Create new database
-db = my.connect(host='localhost', user='root', passwd='')
+db = my.connect(host='localhost', user='root', passwd='password')
 cursor = db.cursor()
 sql = ("CREATE DATABASE football_data COLLATE 'utf8_general_ci'")
 sql_execute = cursor.execute(sql)
@@ -39,7 +39,7 @@ db.close()
 
 
 # Connect to the newly-created database
-db = my.connect(host='localhost', user='root', passwd='', db='football_data')
+db = my.connect(host='localhost', user='root', passwd='password', db='football_data')
 cursor = db.cursor()
 
 

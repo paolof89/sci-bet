@@ -28,7 +28,7 @@ def main(input_query='queries/mlp_1_input.sql'):
     logger.info('Model config in {}'.format(config_file))
     cfg = read_yaml(config_file)
 
-    db = create_engine("mysql://root@localhost/football_data")
+    db = create_engine("mysql://root:password@localhost/football_data")
     logger.debug('Load match features in: {}'.format(input_query))
     query = read_query(input_query)
     df = pd.read_sql(query, con=db)

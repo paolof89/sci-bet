@@ -16,14 +16,18 @@ def main():
     logger = logging.getLogger(__name__)
     logger.info('making final data set from raw data')
 
-    db = create_engine("mysql://root@localhost/football_data")
+    db = create_engine("mysql://root:password@localhost/football_data")
 
-    #create_matches_table(db)
+    print('Download matches')
+    create_matches_table(db)
 
-    #create_elo_dict(db)
+    print('Write elo dict')
+    create_elo_dict(db)
 
+    print('Create elo score')
     create_elo_scores(db)
 
+    print('Update elo on match table')
     update_elo_on_match_table(db)
 
 
