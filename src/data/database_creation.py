@@ -10,12 +10,16 @@
 # Import required packages and functions
 import pymysql
 pymysql.install_as_MySQLdb()  # Install MySQL driver
-import MySQLdb as my
+import  as my
+from sqlalchemy import create_engine
+
+user='paolo'
+pwd='password'
 
 # Drop existing db
 try:
 # Connect to the localhost
-    db = my.connect(host='localhost', user='root', passwd='password')
+    db = my.connect(host='localhost', user=user, passwd=pwd)
     cursor = db.cursor()
 
 # Drop old version of the database
@@ -30,7 +34,7 @@ except:
 
 
 # Create new database
-db = my.connect(host='localhost', user='root', passwd='password')
+db = my.connect(host='localhost', user=user, password=pwd)
 cursor = db.cursor()
 sql = ("CREATE DATABASE football_data COLLATE 'utf8_general_ci'")
 sql_execute = cursor.execute(sql)
@@ -39,7 +43,7 @@ db.close()
 
 
 # Connect to the newly-created database
-db = my.connect(host='localhost', user='root', passwd='password', db='football_data')
+db = my.connect(host='localhost', user=user, passwd=pwd, db='football_data')
 cursor = db.cursor()
 
 

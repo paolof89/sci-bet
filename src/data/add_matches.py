@@ -2,17 +2,20 @@
 from sqlalchemy import create_engine
 import click
 import pandas as pd
+from dotenv import dotenv_values
+
 
 @click.command()
 def add_matches():
     #Connect to the MySQL database
-    db = create_engine("mysql://root:password@localhost/football_data")
+    config = dotenv_values()
+    db = create_engine("mysql://{user}:{pwd}@localhost/football_data".format(user=config['USER'], pwd=config['PWD']))
 
     #Initialise an empty list
     files = []
-    seasons = ['1314'] #['0910', '1011', '1112', '1213', '1314', '1415', '1516', '1617', '1718']
+    seasons = ['2021'] #['0910', '1011', '1112', '1213', '1314', '1415', '1516', '1617', '1718', '1819', '1920', '2021']
 
-    competitions = ["B1"] #'["E0", "SP1", "D1", "D2", "F1", "F2", "N1", "B1", "E1", "E2", "SC0", "SC1", "I1", "I2", "T1", "P1"]
+    competitions = ['I1'] #["E0", "SP1", "D1", "D2", "F1", "F2", "N1", "B1", "E1", "E2", "SC0", "SC1", "I1", "I2", "T1", "P1"]
 
     for s in seasons:
         for c in competitions:

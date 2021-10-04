@@ -15,8 +15,8 @@ def create_matches_table(db):
 
         try:
             print('http://www.football-data.co.uk/mmz4281/'+s+'/'+c+'.csv')
-            # data = pd.read_csv('http://www.football-data.co.uk/mmz4281/'+s+'/'+c+'.csv')
-            data = pd.read_csv('data/raw/B1.csv')
+            data = pd.read_csv('http://www.football-data.co.uk/mmz4281/'+s+'/'+c+'.csv')
+
         except Exception as e:
             # TODO manage error file not exist
             print('No data for this league: {competition} / {season}'.format(competition=c, season=s))
@@ -27,7 +27,10 @@ def create_matches_table(db):
             continue
 
         try:
-            data['Date'] = pd.to_datetime(data['Date'], format='%d/%m/%y').apply(lambda x: x.strftime('%Y-%m-%d'))
+            if len(data.Date[0]==10):
+                data['Date'] = pd.to_datetime(data['Date'], format='%d/%m/%Y').apply(lambda x: x.strftime('%Y-%m-%d'))
+            else:
+                data['Date'] = pd.to_datetime(data['Date'], format='%d/%m/%y').apply(lambda x: x.strftime('%Y-%m-%d'))
         except Exception as e:
             logger.error('Failed: ' + str(e))
             db.execute("UPDATE add_files SET failed=2 "
