@@ -16,7 +16,7 @@ def create_elo_dict(db):
         select `elo_name` from elo_master where teams.long_name = elo_master.`fd_name`)""")
 
 
-def create_elo_scores(db):
+def     create_elo_scores(db):
     logger = logging.getLogger(__name__)
 
     teams = pd.read_sql("""select team_id, elo_name from teams""", db)
@@ -40,7 +40,7 @@ def create_elo_scores(db):
             except:
                 last = '2009-01-01'
 
-            logger.info('Last valid:', last)
+            logger.info('Last valid: {}'.format(last))
 
             eloRank = eloRank.loc[(eloRank.From >= last)&(eloRank.To <= now)]
 
@@ -56,9 +56,8 @@ def create_elo_scores(db):
             db.execute(update_elo_master)
 
         except Exception as e:
-            pass
-            # logger.error('Failed: ' + str(e))
-            # logger.error('on ', team.elo_name)
+            logger.error('Failed: ' + str(e))
+            logger.error('on {}'.format(team.elo_name))
 
 
 def update_elo_scores(db):

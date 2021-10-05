@@ -27,7 +27,7 @@ def create_matches_table(db):
             continue
 
         try:
-            if len(data.Date[0]==10):
+            if len(data.Date[0])==10:
                 data['Date'] = pd.to_datetime(data['Date'], format='%d/%m/%Y').apply(lambda x: x.strftime('%Y-%m-%d'))
             else:
                 data['Date'] = pd.to_datetime(data['Date'], format='%d/%m/%y').apply(lambda x: x.strftime('%Y-%m-%d'))
@@ -91,17 +91,32 @@ def fill_shots_columns(data):
 
 def matches_to_db(data, db, c, s, logger):
     try:
-        data[['Date', 'competition_code', 'season_code', 'HomeTeam_id', 'AwayTeam_id', 'FTHG', 'FTAG', 'FTR',
-              'HTHG', 'HTAG', 'HTR', 'HS', 'AS', 'HST', 'AST', 'B365H', 'B365D', 'B365A', 'BWH', 'BWD', 'BWA', 'WHH',
-              'WHD', 'WHA', 'BbMxH', 'BbAvH', 'BbMxD', 'BbAvD', 'BbMxA', 'BbAvA', 'BbMx>2.5', 'BbAv>2.5', 'BbMx<2.5',
-              'BbAv<2.5']].to_sql(name='temp_matches', con=db, if_exists='replace', index=False)
+        data.rename(columns={'BbMxH': 'MaxH', 'BbAvH': 'AvgH',
+                             'BbMxD': 'MaxD', 'BbAvD': 'AvgD',
+                             'BbMxA': 'MaxA', 'BbAvA': 'AvgA',
+                             'BbMx>2.5': 'Max>2.5', 'BbAv>2.5': 'Avg>2.5',
+                             'BbMx<2.5': 'Max<2.5', 'BbAv<2.5': 'Avg<2.5'})
+
+        not_mandatory_columns = ['HTHG', 'HTAG', 'HTR', 'HS', 'AS', 'HST', 'AST', 'B365H', 'B365D', 'B365A',
+                   'BWH', 'BWD', 'BWA', 'IWH', 'IWD', 'IWA', 'PSH', 'PSD', 'PSA',
+                   'WHH', 'WHD', 'WHA', 'VCH', 'VCD', 'VCA', 'MaxH', 'MaxD', 'MaxA', 'AvgH', 'AvgD', 'AvgA',
+                   'Max>2.5', 'Max<2.5', 'Avg>2.5', 'Avg<2.5']
+
+        for c in not_mandatory_columns:
+            if c not in data:
+                data[c] = None
+
+        data[['Date', 'competition_code', 'season_code', 'HomeTeam_id', 'AwayTeam_id', 'FTHG', 'FTAG', 'FTR'
+              ] + not_mandatory_columns].to_sql(name='temp_matches', con=db, if_exists='replace', index=False)
 
         insert_team_sql = ("""INSERT INTO matches (Date, competition_code, season_code, HomeTeam, AwayTeam,
-         FTHG, FTAG, FTR, HTHG, HTAG, HTR, HS, `AS`, HST, AST, B365H, B365D, B365A, BWH, BWD, BWA, WHH,
-        WHD, WHA, BbMxH, BbAvH,	BbMxD, BbAvD, BbMxA, BbAvA, `BbMx>2.5`, `BbAv>2.5`, `BbMx<2.5`, `BbAv<2.5`)
+         FTHG, FTAG, FTR, HTHG, HTAG, HTR, HS, `AS`, HST, AST, B365H, B365D, B365A,
+                   BWH, BWD, BWA, IWH, IWD, IWA, PSH, PSD, PSA,
+                   WHH, WHD, WHA, VCH, VCD, VCA, MaxH, AvgH, MaxD, AvgD, MaxA, AvgA, `Max>2.5`, `Avg>2.5`, `Max<2.5`, `Avg<2.5`)
          SELECT Date, competition_code, season_code, HomeTeam_id, AwayTeam_id,
-          FTHG, FTAG, FTR, HTHG, HTAG, HTR, HS, `AS`, HST, AST, B365H, B365D, B365A, BWH, BWD, BWA, WHH,
-        WHD, WHA, BbMxH, BbAvH,	BbMxD, BbAvD, BbMxA, BbAvA, `BbMx>2.5`, `BbAv>2.5`, `BbMx<2.5`, `BbAv<2.5` from temp_matches""")
+          FTHG, FTAG, FTR, HTHG, HTAG, HTR, HS, `AS`, HST, AST,B365H, B365D, B365A,
+                   BWH, BWD, BWA, IWH, IWD, IWA, PSH, PSD, PSA,
+                   WHH, WHD, WHA, VCH, VCD, VCA, MaxH, AvgH, MaxD, AvgD, MaxA, AvgA, `Max>2.5`, `Avg>2.5`, `Max<2.5`, `Avg<2.5` from temp_matches""")
 
         db.execute(insert_team_sql)
         db.execute("UPDATE add_files SET added=1 "

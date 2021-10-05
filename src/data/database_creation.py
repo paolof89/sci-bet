@@ -10,16 +10,15 @@
 # Import required packages and functions
 import pymysql
 pymysql.install_as_MySQLdb()  # Install MySQL driver
-import  as my
-from sqlalchemy import create_engine
+import MySQLdb as my
+from dotenv import dotenv_values
 
-user='paolo'
-pwd='password'
 
 # Drop existing db
 try:
 # Connect to the localhost
-    db = my.connect(host='localhost', user=user, passwd=pwd)
+    config = dotenv_values()
+    db = my.connect(host='localhost', user=config['USER'], passwd=config['PWD'])
     cursor = db.cursor()
 
 # Drop old version of the database
@@ -34,7 +33,7 @@ except:
 
 
 # Create new database
-db = my.connect(host='localhost', user=user, password=pwd)
+db = my.connect(host='localhost', user=config['USER'], passwd=config['PWD'])
 cursor = db.cursor()
 sql = ("CREATE DATABASE football_data COLLATE 'utf8_general_ci'")
 sql_execute = cursor.execute(sql)
@@ -43,7 +42,7 @@ db.close()
 
 
 # Connect to the newly-created database
-db = my.connect(host='localhost', user=user, passwd=pwd, db='football_data')
+db = my.connect(host='localhost', user=config['USER'], passwd=config['PWD'], db='football_data')
 cursor = db.cursor()
 
 
@@ -70,8 +69,10 @@ sql_execute = cursor.execute(sql)
 sql = ("INSERT INTO seasons "
        "(season_code, season_name) "
        "VALUES (%s, %s)")
-sql_execute = cursor.executemany(sql, [['0910', "2009/10"], ['1011', "2010/11"], ['1112', "2011/12"]
-    , ['1213', "2012/13"], ['1314', "2013/14"], ['1415', "2014/15"], ['1516', "2015/16"], ['1617', "2016/17"]])
+sql_execute = cursor.executemany(
+    sql, [['0910', "2009/10"], ['1011', "2010/11"], ['1112', "2011/12"], ['1213', "2012/13"], ['1314', "2013/14"],
+          ['1415', "2014/15"], ['1516', "2015/16"], ['1617', "2016/17"], ['1718', "2017/18"], ['1819', "2018/19"],
+          ['1920', "2019/20"], ['2021', "2020/21"], ['2122', "2021/22"]])
 
 
 # Create competitions table
@@ -125,16 +126,25 @@ sql = ("""CREATE TABLE matches (
 	`WHH` DOUBLE NULL DEFAULT NULL,
 	`WHD` DOUBLE NULL DEFAULT NULL,
 	`WHA` DOUBLE NULL DEFAULT NULL,
-	`BbMxH` DOUBLE NULL DEFAULT NULL,
-	`BbAvH` DOUBLE NULL DEFAULT NULL,
-	`BbMxD` DOUBLE NULL DEFAULT NULL,
-	`BbAvD` DOUBLE NULL DEFAULT NULL,
-    `BbMxA` DOUBLE NULL DEFAULT NULL,
-    `BbAvA` DOUBLE NULL DEFAULT NULL,
-    `BbMx>2.5` DOUBLE NULL DEFAULT NULL,
-    `BbAv>2.5` DOUBLE NULL DEFAULT NULL,
-    `BbMx<2.5`  DOUBLE NULL DEFAULT NULL,
-    `BbAv<2.5` DOUBLE NULL DEFAULT NULL,
+	`IWH` DOUBLE NULL DEFAULT NULL,
+	`IWD` DOUBLE NULL DEFAULT NULL,
+	`IWA` DOUBLE NULL DEFAULT NULL,
+	`PSH` DOUBLE NULL DEFAULT NULL,
+	`PSD` DOUBLE NULL DEFAULT NULL,
+	`PSA` DOUBLE NULL DEFAULT NULL,
+	`VCH` DOUBLE NULL DEFAULT NULL,
+	`VCD` DOUBLE NULL DEFAULT NULL,
+	`VCA` DOUBLE NULL DEFAULT NULL,	
+	`MaxH` DOUBLE NULL DEFAULT NULL,
+	`AvgH` DOUBLE NULL DEFAULT NULL,
+	`MaxD` DOUBLE NULL DEFAULT NULL,
+	`AvgD` DOUBLE NULL DEFAULT NULL,
+    `MaxA` DOUBLE NULL DEFAULT NULL,
+    `AvgA` DOUBLE NULL DEFAULT NULL,
+    `Max>2.5` DOUBLE NULL DEFAULT NULL,
+    `Avg>2.5` DOUBLE NULL DEFAULT NULL,
+    `Max<2.5`  DOUBLE NULL DEFAULT NULL,
+    `Avg<2.5` DOUBLE NULL DEFAULT NULL,
     INDEX date_teams USING BTREE (Date, HomeTeam, AwayTeam))
     COLLATE='latin1_swedish_ci'
     ENGINE=InnoDB""")
