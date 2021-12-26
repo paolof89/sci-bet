@@ -7,6 +7,8 @@ from sqlalchemy import create_engine
 pymysql.install_as_MySQLdb() #Install MySQL driver
 from src.data.from_footballdata import create_matches_table, add_latest_matches
 from src.data.from_clubelo import create_elo_scores, create_elo_dict, update_elo_scores
+from dotenv import dotenv_values
+
 
 @click.command()
 def main():
@@ -16,9 +18,10 @@ def main():
     logger = logging.getLogger(__name__)
     logger.info('making final data set from raw data')
 
-    db = create_engine("mysql://root:password@localhost/football_data")
+    config = dotenv_values()
+    db = create_engine("mysql://{user}:{pwd}@localhost/football_data".format(user=config['USER'], pwd=config['PWD']))
 
-    add_latest_matches(db, '1718')
+    add_latest_matches(db, '2122')
 
     update_elo_scores(db)
 

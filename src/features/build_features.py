@@ -7,6 +7,7 @@ import pymysql
 from sqlalchemy import create_engine
 import numpy as np
 from src.features.features_functions import average_last_5_matches
+from dotenv import dotenv_values
 
 
 @click.command()
@@ -16,7 +17,8 @@ def main():
     logger = logging.getLogger(__name__)
     logger.info('Build features')
 
-    db = create_engine("mysql://root:password@localhost/football_data")
+    config = dotenv_values()
+    db = create_engine("mysql://{user}:{pwd}@localhost/football_data".format(user=config['USER'], pwd=config['PWD']))
 
     matches = pd.read_sql("select * from matches", db)
     matches = average_last_5_matches(matches)

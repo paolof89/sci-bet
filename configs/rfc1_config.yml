@@ -5,9 +5,9 @@ features:
     - a_avg_scored
     - a_avg_conceded
     - a_avg_elo
-    - BbAvH
-    - BbAvD
-    - BbAvA
+    - AvgH
+    - AvgD
+    - AvgA
 
 output:
     - FTR

@@ -12,6 +12,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.metrics import log_loss
 import pickle
+from dotenv import dotenv_values
+
 
 @click.command()
 @click.option('--input-query', type=click.Path(exists=True), default='queries/mlp_1_input.sql')
@@ -28,7 +30,9 @@ def main(input_query='queries/mlp_1_input.sql'):
     logger.info('Model config in {}'.format(config_file))
     cfg = read_yaml(config_file)
 
-    db = create_engine("mysql://root:password@localhost/football_data")
+    config = dotenv_values()
+    db = create_engine("mysql://{user}:{pwd}@localhost/football_data".format(user=config['USER'], pwd=config['PWD']))
+
     logger.debug('Load match features in: {}'.format(input_query))
     query = read_query(input_query)
     df = pd.read_sql(query, con=db)

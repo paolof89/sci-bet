@@ -91,7 +91,7 @@ def fill_shots_columns(data):
 
 def matches_to_db(data, db, c, s, logger):
     try:
-        data.rename(columns={'BbMxH': 'MaxH', 'BbAvH': 'AvgH',
+        data = data.rename(columns={'BbMxH': 'MaxH', 'BbAvH': 'AvgH',
                              'BbMxD': 'MaxD', 'BbAvD': 'AvgD',
                              'BbMxA': 'MaxA', 'BbAvA': 'AvgA',
                              'BbMx>2.5': 'Max>2.5', 'BbAv>2.5': 'Avg>2.5',
@@ -129,8 +129,12 @@ def matches_to_db(data, db, c, s, logger):
 
 def add_latest_matches(db, season):
     logger = logging.getLogger(__name__)
-    data = pd.read_csv('http://www.football-data.co.uk/fixtures.csv')
-    data['Date'] = pd.to_datetime(data['Date'], format='%d/%m/%y').apply(lambda x: x.strftime('%Y-%m-%d'))
+    data = pd.read_csv('http://www.football-data.co.uk/fixtures.csv', encoding='utf-8', encoding_errors='ignore')
+
+    if len(data.Date[0]) == 10:
+        data['Date'] = pd.to_datetime(data['Date'], format='%d/%m/%Y').apply(lambda x: x.strftime('%Y-%m-%d'))
+    else:
+        data['Date'] = pd.to_datetime(data['Date'], format='%d/%m/%y').apply(lambda x: x.strftime('%Y-%m-%d'))
 
     data, teams_names = clean_team_names(data)
     data = add_teams_id(data, db)
